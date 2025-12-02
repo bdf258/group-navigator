@@ -198,24 +198,64 @@ const App = () => {
       </header>
 
       {/* MAIN LAYOUT */}
-      <div className="flex-1 grid grid-cols-[1fr_300px] grid-rows-[1fr_120px] overflow-hidden relative">
-        
-        {/* 1. CENTER (Canvas) */}
-        <div 
-          className="row-start-1 row-end-2 col-start-1 relative bg-slate-950"
-          onPointerMove={handlePointerMove}
-          onWheelCapture={handleCanvasWheel}
-        >
-          <div className="absolute inset-0">
-             <Scene data={data} enableZoom={!isHoveringLeft} />
+      <div className="flex-1 flex overflow-hidden relative">
+
+        {/* LEFT COLUMN: Canvas + Bottom Panel */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+
+          {/* 1. CENTER (Canvas) */}
+          <div
+            className="flex-1 relative bg-slate-950"
+            onPointerMove={handlePointerMove}
+            onWheelCapture={handleCanvasWheel}
+          >
+            <div className="absolute inset-0">
+               <Scene data={data} enableZoom={!isHoveringLeft} />
+            </div>
+
+            {/* Key / Legend Overlay */}
+            <Legend people={data.people} />
           </div>
-          
-          {/* Key / Legend Overlay */}
-          <Legend people={data.people} />
+
+          {/* 3. BOTTOM PANEL (Date Navigator) */}
+          <div className="h-[120px] border-t border-slate-800 bg-slate-900 z-10 flex flex-col shrink-0">
+              <div className="px-4 py-2 border-b border-slate-800/50 flex justify-between items-center bg-slate-900/50">
+                  <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">Timeline Navigator</span>
+                  <span className="text-xs text-slate-600">{dates[0].format('MMM D')} - {dates[dates.length-1].format('MMM D')}</span>
+              </div>
+
+              <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-center px-4 gap-2 hide-scrollbar">
+                  {dates.map((date, i) => {
+                      const dateStr = date.format('YYYY-MM-DD');
+                      const isActive = filters.date === dateStr;
+
+                      return (
+                          <button
+                              key={i}
+                              onClick={() => {
+                                  setFilterDate(dateStr);
+                                  setScrollX(i * dimensions.dayWidth);
+                              }}
+                              className={`
+                                  flex flex-col items-center justify-center h-12 min-w-[4rem] rounded-md border transition-all duration-200
+                                  ${isActive
+                                      ? 'bg-blue-600/20 border-blue-500 text-blue-400'
+                                      : 'bg-slate-800/40 border-slate-700 text-slate-400 hover:bg-slate-800 hover:border-slate-600'
+                                  }
+                              `}
+                          >
+                              <span className="text-xs font-bold uppercase">{date.format('MMM')}</span>
+                              <span className="text-xs font-bold">{date.format('DD')}</span>
+                          </button>
+                      );
+                  })}
+              </div>
+          </div>
+
         </div>
 
         {/* 2. RIGHT PANEL (Details) */}
-        <div className="row-start-1 z-100 row-end-3 col-start-2 border-l border-slate-800 bg-slate-900 z-20 flex flex-col shadow-xl">
+        <div className="w-[300px] border-l border-slate-800 bg-slate-900 z-20 flex flex-col shadow-xl shrink-0">
           {selectedFile ? (
             <div className="flex flex-col h-full animate-in slide-in-from-right duration-300">
                <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
@@ -224,12 +264,12 @@ const App = () => {
                     <X size={16} />
                   </Button>
                </div>
-               
+
                <div className="p-4 space-y-6 flex-1 overflow-y-auto">
                  <div>
                     <h2 className="text-2xl font-bold text-white mb-2">{selectedFile.name}</h2>
                     <div className="flex flex-wrap gap-2">
-                      <Badge 
+                      <Badge
                         className="capitalize"
                         style={{ backgroundColor: getNodeColor(selectedFile.action, selectedFile.priority), color: 'white' }}
                       >
@@ -288,41 +328,6 @@ const App = () => {
                 <p className="text-sm">Select a file node to view details.</p>
              </div>
           )}
-        </div>
-
-        {/* 3. BOTTOM PANEL (Date Navigator) */}
-        <div className="row-start-2 col-start-1 border-t border-slate-800 bg-slate-900 z-10 flex flex-col">
-            <div className="px-4 py-2 border-b border-slate-800/50 flex justify-between items-center bg-slate-900/50">
-                <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">Timeline Navigator</span>
-                <span className="text-xs text-slate-600">{dates[0].format('MMM D')} - {dates[dates.length-1].format('MMM D')}</span>
-            </div>
-            
-            <div className="flex-1 overflow-x-auto overflow-y-hidden flex items-center px-4 gap-2 hide-scrollbar">
-                {dates.map((date, i) => {
-                    const dateStr = date.format('YYYY-MM-DD');
-                    const isActive = filters.date === dateStr;
-                    
-                    return (
-                        <button
-                            key={i}
-                            onClick={() => {
-                                setFilterDate(dateStr);
-                                setScrollX(i * dimensions.dayWidth); 
-                            }}
-                            className={`
-                                flex flex-col items-center justify-center h-12 min-w-[4rem] rounded-md border transition-all duration-200
-                                ${isActive 
-                                    ? 'bg-blue-600/20 border-blue-500 text-blue-400' 
-                                    : 'bg-slate-800/40 border-slate-700 text-slate-400 hover:bg-slate-800 hover:border-slate-600'
-                                }
-                            `}
-                        >
-                            <span className="text-xs font-bold uppercase">{date.format('MMM')}</span>
-                            <span className="text-xs font-bold">{date.format('DD')}</span>
-                        </button>
-                    );
-                })}
-            </div>
         </div>
 
       </div>
