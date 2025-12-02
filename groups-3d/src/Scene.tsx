@@ -3,8 +3,9 @@ import { OrbitControls, Environment, OrthographicCamera } from '@react-three/dre
 import { useStore } from './store';
 import Rig from './components/ui/Rig';
 import Files from './components/ui/Files';
-import PeopleLayers from './components/ui/PeopleLayers'; 
+import PriorityLayers from './components/ui/PriorityLayers';
 import GroupLayers from './components/ui/GroupLayers';
+import SceneTimeline from './components/ui/SceneTimeline';
 import type { GeneratedData } from './types';
 
 interface SceneProps {
@@ -13,21 +14,19 @@ interface SceneProps {
 }
 
 const Scene = ({ data, enableZoom }: SceneProps) => {
-  const { selectFile, selectPerson, selectGroup } = useStore();
+  const { clearFilters } = useStore();
 
   const handleBackgroundClick = () => {
-    selectFile(null);
-    selectPerson(null);
-    selectGroup(null);
+    clearFilters();
   };
 
   return (
     <Canvas onPointerMissed={handleBackgroundClick}>
       {/* Orthographic Camera Setup */}
-      <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20} near={-200} far={2000} />
+      <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20} near={-2000} far={2000} />
       
       <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
+      <pointLight position={[10, 10, 50]} intensity={1} />
       <Environment preset="city" />
 
       {/* Controls & Navigation */}
@@ -35,8 +34,9 @@ const Scene = ({ data, enableZoom }: SceneProps) => {
       <Rig />
 
       {/* Content */}
+      <SceneTimeline data={data} />
       <GroupLayers data={data} />
-      <PeopleLayers data={data} />
+      <PriorityLayers data={data} />
       <Files data={data} />
     
     </Canvas>

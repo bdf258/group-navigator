@@ -1,10 +1,13 @@
 import { Dayjs } from 'dayjs';
 
+export type Priority = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 'p7' | 'p8' | 'p9';
+
+export type NodeShape = 'box' | 'sphere' | 'cone' | 'cylinder' | 'torus' | 'dodecahedron' | 'octahedron' | 'icosahedron';
+
 export interface Person {
   id: string;
   name: string;
-  color: string;
-  zIndex: number;
+  shape: NodeShape;
 }
 
 export interface Group {
@@ -20,9 +23,9 @@ export interface FileNode {
   name: string;
   groupId: string;
   personId: string;
-  date: string; // ISO String
+  date: string; // ISO String (Date + Time)
   action: FileAction;
-  color: string;
+  priority: Priority;
 }
 
 export interface GeneratedData {
@@ -33,3 +36,9 @@ export interface GeneratedData {
 }
 
 export type ViewMode = 'front' | 'top' | 'side';
+
+export interface FilterState {
+  groupId: string | null;
+  priority: Priority | null;
+  date: string | null; // ISO Date String (YYYY-MM-DD)
+}

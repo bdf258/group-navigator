@@ -32,15 +32,15 @@ const Rig = () => {
     // Determine target config based on ViewMode
     if (viewMode === 'front') { 
       // Groups x Time (Standard)
-      endPosOffset.current.set(20, -10, dist);
-      endTargetOffset.current.set(20, -10, 0);
-      endZoom.current = 6; 
+      endPosOffset.current.set(70, 0, dist);
+      endTargetOffset.current.set(70, 0, 0);
+      endZoom.current = 9; 
 
     } else if (viewMode === 'top') { 
       // Time x People (Top Down)
       // Looking down Y axis, Z is up on screen
-      endPosOffset.current.set(10, dist, 0);
-      endTargetOffset.current.set(10, 0, 0);
+      endPosOffset.current.set(50, dist, 20);
+      endTargetOffset.current.set(50, 0, 20);
       endZoom.current = 7; // Slightly zoomed out
     } else if (viewMode === 'side') { 
       // People x Groups (Side)

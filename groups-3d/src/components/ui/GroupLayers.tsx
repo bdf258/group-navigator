@@ -7,32 +7,28 @@ interface GroupLayersProps {
 }
 
 const GroupLayers = ({ data }: GroupLayersProps) => {
-  const { dimensions, selectGroup, selectedGroupId, selectedFile } = useStore();
+  const { dimensions, setFilterGroup, filters } = useStore();
   const { groups } = data;
 
   const handleGroupClick = (groupId: string, e: any) => {
     e.stopPropagation();
-    selectGroup(groupId);
+    setFilterGroup(groupId);
   };
 
   return (
     <group>
       {groups.map((group) => {
-        // Position
-        // Y: Based on group index
         const y = group.yIndex * dimensions.groupHeight;
-        // X: To the left of the timeline
         const x = -3; 
         const z = 0.5;
 
         // Visual State
-        const isSelected = selectedGroupId === group.id;
-        const isFileOwner = selectedFile?.groupId === group.id;
-        const isActive = isSelected || isFileOwner;
+        const isSelected = filters.groupId === group.id;
+        // If filters are active, dim non-selected groups
+        const isDimmed = filters.groupId && !isSelected;
 
-        // Opacity/Color Logic
-        const color = isActive ? 'white' : '#94a3b8'; // slate-400
-        const opacity = (selectedGroupId && !isActive) ? 0.3 : 1;
+        const color = isSelected ? '#3b82f6' : '#94a3b8';
+        const opacity = isDimmed ? 0.3 : 1;
 
         return (
           <group 
@@ -43,7 +39,7 @@ const GroupLayers = ({ data }: GroupLayersProps) => {
             onPointerOut={() => { document.body.style.cursor = 'auto'; }}
           >
              <Text
-                fontSize={1.2} // Increased size
+                fontSize={1.2}
                 color={color}
                 anchorX="right"
                 anchorY="middle"
@@ -52,8 +48,7 @@ const GroupLayers = ({ data }: GroupLayersProps) => {
                 {group.name}
               </Text>
 
-              {/* Highlight Line if active */}
-              {isActive && (
+              {isSelected && (
                 <mesh position={[1.5, -0.05, 0]}>
                    <boxGeometry args={[3, 0.1, 0.05]} />
                    <meshBasicMaterial color="#3b82f6" />
