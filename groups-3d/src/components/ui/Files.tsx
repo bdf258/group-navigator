@@ -1,54 +1,76 @@
 import { useState } from 'react';
-import { Html } from '@react-three/drei';
 import dayjs from 'dayjs';
 import { useStore } from '../../store';
 import type { GeneratedData, FileNode, Group, Person } from '../../types';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
-interface FileBoxProps {
+interface FilePillProps {
   file: FileNode;
   position: [number, number, number];
   isFlyMode: boolean;
+  opacity: number;
 }
 
-const FileBox = ({ file, position, isFlyMode }: FileBoxProps) => {
+const FilePill = ({ file, position, isFlyMode, opacity }: FilePillProps) => {
   const [hovered, setHovered] = useState(false);
+  const { selectFile } = useStore();
+
+  const handlePointerOver = (e: any) => {
+    e.stopPropagation();
+    setHovered(true);
+    document.body.style.cursor = 'pointer';
+  };
+
+  const handlePointerOut = () => {
+    setHovered(false);
+    document.body.style.cursor = 'auto';
+  };
+
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    selectFile(file);
+  };
+
+  const radius = 0.25;
+  const length = 1.0; 
 
   return (
-    <mesh
-      position={position}
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-      onPointerOut={() => setHovered(false)}
-    >
-      <boxGeometry args={[1.5, 0.5, 0.5]} />
-      <meshStandardMaterial 
-        color={file.color} 
-        transparent={isFlyMode}
-        opacity={isFlyMode ? 0.5 : 1}
-      />
+    <group position={position} onClick={handleClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
       
-      {/* Shadcn UI Tooltip */}
-      {hovered && !isFlyMode && (
-        <Html position={[0, 1, 0]} center style={{ pointerEvents: 'none', width: '200px', zIndex: 50 }}>
-          <Card className="bg-slate-950 border-slate-700 shadow-2xl">
-            <CardHeader className="p-3 pb-1">
-              <CardTitle className="text-sm text-slate-100 flex justify-between items-center">
-                {file.name}
-                <Badge variant="outline" className="text-[10px] h-5 capitalize text-slate-300 border-slate-600">
-                  {file.action}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 pt-1">
-              <p className="text-xs text-slate-400">
-                {dayjs(file.date).format('MMM D, YYYY')}
-              </p>
-            </CardContent>
-          </Card>
-        </Html>
+      {/* 1. Main Body */}
+      <mesh rotation={[0, 0, -Math.PI / 2]}>
+        <cylinderGeometry args={[radius, radius, length, 32]} />
+        <meshStandardMaterial color={file.color} transparent opacity={opacity} />
+      </mesh>
+
+      {/* 2. Caps */}
+       <mesh position={[-length / 2, 0, 0]}>
+          <sphereGeometry args={[radius, 32, 16]} />
+          <meshStandardMaterial color={file.color} transparent opacity={opacity} />
+       </mesh>
+
+       <mesh position={[length / 2, 0, 0]}>
+          <sphereGeometry args={[radius, 32, 16]} />
+          <meshStandardMaterial color={file.color} transparent opacity={opacity} />
+       </mesh>
+
+      {/* Hover Effect */}
+      {hovered && (
+        <group>
+           <mesh rotation={[0, 0, -Math.PI / 2]}>
+              <cylinderGeometry args={[radius * 1.1, radius * 1.1, length, 32]} />
+              <meshBasicMaterial color="white" transparent opacity={0.2} side={1} /> 
+           </mesh>
+           <mesh position={[-length / 2, 0, 0]}>
+              <sphereGeometry args={[radius * 1.1, 32, 16]} />
+              <meshBasicMaterial color="white" transparent opacity={0.2} side={1} /> 
+           </mesh>
+           <mesh position={[length / 2, 0, 0]}>
+              <sphereGeometry args={[radius * 1.1, 32, 16]} />
+              <meshBasicMaterial color="white" transparent opacity={0.2} side={1} /> 
+           </mesh>
+        </group>
       )}
-    </mesh>
+    </group>
   );
 };
 
@@ -57,7 +79,7 @@ interface FilesProps {
 }
 
 const Files = ({ data }: FilesProps) => {
-  const { viewMode, dimensions } = useStore();
+  const { viewMode, dimensions, selectedFile, selectedPersonId, selectedGroupId } = useStore();
   const { files, groups, people, startDate } = data;
 
   return (
@@ -71,13 +93,27 @@ const Files = ({ data }: FilesProps) => {
 
         const personIndex = people.findIndex((p: Person) => p.id === file.personId);
         const z = personIndex * -dimensions.personDepth;
+        
+        // Opacity Logic
+        let opacity = 1;
+        
+        if (selectedFile) {
+          opacity = selectedFile.id === file.id ? 1 : 0.3;
+        } else if (selectedPersonId) {
+          opacity = file.personId === selectedPersonId ? 1 : 0.3;
+        } else if (selectedGroupId) {
+          opacity = file.groupId === selectedGroupId ? 1 : 0.3;
+        }
+
+        if (viewMode === 'fly') opacity = 0.5;
 
         return (
-          <FileBox 
+          <FilePill 
             key={file.id} 
             file={file} 
             position={[x, y, z]} 
             isFlyMode={viewMode === 'fly'}
+            opacity={opacity}
           />
         );
       })}

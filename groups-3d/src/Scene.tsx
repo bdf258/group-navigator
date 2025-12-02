@@ -3,7 +3,8 @@ import { OrbitControls, Environment } from '@react-three/drei';
 import { useStore } from './store';
 import Rig from './components/ui/Rig';
 import Files from './components/ui/Files';
-import PeopleLayers from './components/ui/PeopleLayers.tsx'; 
+import PeopleLayers from './components/ui/PeopleLayers'; 
+import GroupLayers from './components/ui/GroupLayers';
 import type { GeneratedData } from './types';
 
 interface SceneProps {
@@ -11,10 +12,19 @@ interface SceneProps {
 }
 
 const Scene = ({ data }: SceneProps) => {
-  const viewMode = useStore((state) => state.viewMode);
+  const { viewMode, selectFile, selectPerson, selectGroup } = useStore();
+
+  const handleBackgroundClick = () => {
+    selectFile(null);
+    selectPerson(null);
+    selectGroup(null);
+  };
 
   return (
-    <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
+    <Canvas 
+      camera={{ position: [0, 0, 10], fov: 45 }}
+      onPointerMissed={handleBackgroundClick} 
+    >
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} />
       <Environment preset="city" />
@@ -24,15 +34,18 @@ const Scene = ({ data }: SceneProps) => {
       {viewMode === 'fly' && <OrbitControls />}
 
       {/* Content */}
-      <PeopleLayers data={data} /> {/* <--- Add this */}
+      <GroupLayers data={data} />
+      <PeopleLayers data={data} />
       <Files data={data} />
       
-      {/* Helper Grid - Pushed lower to not interfere with text */}
-      <gridHelper 
-        args={[200, 100, 0x555555, 0x222222]} 
-        position={[50, -50, -20]} 
-        rotation={[0, 0, 0]}
-      />
+      {/* Helper Grid - Only visible in grid/fly mode */}
+      {(viewMode === 'grid' || viewMode === 'fly') && (
+        <gridHelper 
+          args={[200, 100, 0x555555, 0x222222]} 
+          position={[50, -50, -20]} 
+          rotation={[0, 0, 0]}
+        />
+      )}
     </Canvas>
   );
 };

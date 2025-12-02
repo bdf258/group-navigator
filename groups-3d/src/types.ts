@@ -32,4 +32,4 @@ export interface GeneratedData {
   startDate: Dayjs;
 }
 
-export type ViewMode = 'grid' | 'fly';
+export type ViewMode = 'grid' | 'fly' | 'top' | 'side';
