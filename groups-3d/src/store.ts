@@ -10,8 +10,7 @@ interface Dimensions {
 interface StoreState {
   // Navigation State
   scrollX: number;
-  scrollY: number;
-  scrollZ: number;
+  scrollY: number; // Added vertical scroll state
   
   viewMode: ViewMode;
   pixelsPerUnit: number;
@@ -24,8 +23,7 @@ interface StoreState {
 
   // Actions
   setScrollX: (val: number) => void;
-  setScrollY: (val: number) => void;
-  setScrollZ: (val: number) => void;
+  setScrollY: (val: number) => void; // Added setter
   setViewMode: (mode: ViewMode) => void;
   
   // Selection Actions
@@ -37,15 +35,14 @@ interface StoreState {
 export const useStore = create<StoreState>((set) => ({
   scrollX: 0,
   scrollY: 0,
-  scrollZ: 10,
   
-  viewMode: 'grid', 
+  viewMode: 'front', 
   pixelsPerUnit: 50, 
 
   dimensions: {
-    dayWidth: 2,   
-    groupHeight: 1.5, 
-    personDepth: 5,   
+    dayWidth: 4,     
+    groupHeight: 4, 
+    personDepth: 8,  
   },
 
   selectedFile: null,
@@ -54,7 +51,6 @@ export const useStore = create<StoreState>((set) => ({
 
   setScrollX: (val) => set({ scrollX: val }),
   setScrollY: (val) => set({ scrollY: val }),
-  setScrollZ: (val) => set({ scrollZ: val }),
   setViewMode: (mode) => set({ viewMode: mode }),
 
   selectFile: (file) => set({ 

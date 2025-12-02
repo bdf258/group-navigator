@@ -17,13 +17,13 @@ const PeopleLayers = ({ data }: PeopleLayersProps) => {
       {people.map((person, index) => {
         const z = index * -dimensions.personDepth;
         const yCenter = -(totalGridHeight / 2);
-        const x = -5; // Moved further left
+        const x = -6; // Moved further left
 
         return (
           <group key={person.id} position={[x, 0, z]}>
             {/* Visual Guide Pillar */}
             <mesh position={[0, yCenter, 0]}>
-              <boxGeometry args={[0.5, totalGridHeight, 0.2]} />
+              <boxGeometry args={[0.8, totalGridHeight, 0.2]} />
               <meshStandardMaterial 
                 color={person.color} 
                 transparent 
@@ -32,17 +32,17 @@ const PeopleLayers = ({ data }: PeopleLayersProps) => {
               />
             </mesh>
 
-            {/* Avatar */}
-            <mesh position={[0, 2, 0]}>
-              <circleGeometry args={[1.5, 32]} />
+            {/* Avatar - Scaled up */}
+            <mesh position={[0, 4, 0]}>
+              <circleGeometry args={[2.5, 32]} />
               <meshBasicMaterial color={person.color} />
               <mesh position={[0, 0, 0.01]}>
-                 <circleGeometry args={[1.3, 32]} />
+                 <circleGeometry args={[2.2, 32]} />
                  <meshBasicMaterial color="#1e293b" /> 
               </mesh>
               <Text
                 position={[0, 0, 0.02]}
-                fontSize={1}
+                fontSize={1.8}
                 color={person.color}
                 anchorX="center"
                 anchorY="middle"
@@ -54,7 +54,7 @@ const PeopleLayers = ({ data }: PeopleLayersProps) => {
             <Text
               position={[0, -2, 0]} 
               rotation={[0, 0, -Math.PI / 2]} 
-              fontSize={1.5} // Bigger font
+              fontSize={2.5} // Bigger font
               color={person.color}
               anchorX="right"
               anchorY="middle"

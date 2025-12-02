@@ -1,29 +1,29 @@
-import { useMemo, useRef, useEffect } from 'react';
-import type { UIEvent, WheelEvent } from 'react';
+import { useMemo, useRef, useEffect, useState } from 'react';
+import type { UIEvent, WheelEvent, PointerEvent } from 'react';
 import { generateData } from './data';
 import { useStore } from './store';
 import Scene from './Scene';
-import { Box, Layers, MousePointer2, X, Map, LayoutGrid } from 'lucide-react';
+import { Box, X, Map, LayoutGrid, Monitor } from 'lucide-react';
 import dayjs from 'dayjs';
 
 // Shadcn Components
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 const App = () => {
   const data = useMemo(() => generateData(), []);
   
   const { 
-    setScrollX, setScrollZ, 
-    scrollX, scrollY, scrollZ,
+    setScrollX, setScrollY,
+    scrollX, scrollY,
     viewMode, setViewMode, 
     dimensions, pixelsPerUnit,
     selectedFile, selectFile 
   } = useStore();
 
   const timelineRef = useRef<HTMLDivElement>(null);
+  const [isHoveringLeft, setIsHoveringLeft] = useState(false);
 
   const totalDays = 30;
   const timelineWidth = totalDays * dimensions.dayWidth * pixelsPerUnit;
@@ -45,17 +45,29 @@ const App = () => {
     setScrollX(x3d);
   };
 
-  const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
-    if (viewMode === 'fly') return;
-    const sensitivity = 0.05;
-    const newZ = scrollZ + (e.deltaY * sensitivity);
-    setScrollZ(newZ);
-    if (selectedFile) selectFile(null);
-  };
-
   const handleTimelineWheel = (e: WheelEvent<HTMLDivElement>) => {
     if (e.deltaY !== 0) {
       e.currentTarget.scrollLeft += e.deltaY;
+    }
+  };
+
+  // Track mouse for left zone detection
+  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const threshold = window.innerWidth / 3;
+    const inLeftZone = e.clientX < threshold;
+    if (inLeftZone !== isHoveringLeft) {
+      setIsHoveringLeft(inLeftZone);
+    }
+  };
+
+  // Intercept wheel on the wrapper
+  const handleCanvasWheel = (e: WheelEvent<HTMLDivElement>) => {
+    if (isHoveringLeft) {
+      // Pan Vertical (Y)
+      const sensitivity = 0.02;
+      // Subtracting deltaY moves camera down (panning view up) or vice versa.
+      // Usually Scroll Down (Positive) -> Move View Down -> Camera Y decreases.
+      setScrollY(scrollY - e.deltaY * sensitivity); 
     }
   };
 
@@ -75,9 +87,18 @@ const App = () => {
 
         <div className="flex gap-2">
            <Button 
+            variant={viewMode === 'front' ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode('front')}
+            className="gap-2 border-slate-700 hover:bg-slate-800 hover:text-white"
+          >
+            <Monitor size={14} /> Groups x Time
+          </Button>
+
+           <Button 
             variant={viewMode === 'top' ? "default" : "outline"}
             size="sm"
-            onClick={() => setViewMode(viewMode === 'top' ? 'grid' : 'top')}
+            onClick={() => setViewMode('top')}
             className="gap-2 border-slate-700 hover:bg-slate-800 hover:text-white"
           >
             <Map size={14} /> Time x People
@@ -86,36 +107,25 @@ const App = () => {
           <Button 
             variant={viewMode === 'side' ? "default" : "outline"}
             size="sm"
-            onClick={() => setViewMode(viewMode === 'side' ? 'grid' : 'side')}
+            onClick={() => setViewMode('side')}
             className="gap-2 border-slate-700 hover:bg-slate-800 hover:text-white"
           >
             <LayoutGrid size={14} /> People x Groups
           </Button>
-
-           <Separator orientation="vertical" className="h-6 bg-slate-700 mx-2" />
-
-           <Button 
-            variant={viewMode === 'fly' ? "default" : "outline"}
-            size="sm"
-            onClick={() => setViewMode(viewMode === 'grid' ? 'fly' : 'grid')}
-            className={`gap-2 ${viewMode === 'grid' ? 'border-slate-700 hover:bg-slate-800 hover:text-white' : ''}`}
-          >
-            {viewMode === 'grid' ? <MousePointer2 size={14} /> : <Layers size={14} />}
-            {viewMode === 'grid' ? 'Enter Fly Mode' : 'Exit Fly Mode'}
-          </Button>
         </div>
       </header>
 
-      {/* MAIN LAYOUT: Removed Left Sidebar */}
+      {/* MAIN LAYOUT */}
       <div className="flex-1 grid grid-cols-[1fr_300px] grid-rows-[1fr_60px] overflow-hidden relative">
         
         {/* 1. CENTER (Canvas) */}
         <div 
           className="row-start-1 row-end-2 col-start-1 relative bg-slate-950"
-          onWheel={handleWheel}
+          onPointerMove={handlePointerMove}
+          onWheelCapture={handleCanvasWheel}
         >
           <div className="absolute inset-0">
-             <Scene data={data} />
+             <Scene data={data} enableZoom={!isHoveringLeft} />
           </div>
         </div>
 
@@ -181,7 +191,7 @@ const App = () => {
           ) : (
              <div className="flex flex-col h-full items-center justify-center text-slate-500 p-8 text-center">
                 <div className="bg-slate-800/50 p-4 rounded-full mb-4">
-                  <MousePointer2 size={24} className="opacity-50" />
+                  <Monitor size={24} className="opacity-50" />
                 </div>
                 <p className="text-sm">Select a file, person, or group to view details.</p>
              </div>

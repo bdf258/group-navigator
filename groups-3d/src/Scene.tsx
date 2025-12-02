@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls, Environment, OrthographicCamera } from '@react-three/drei';
 import { useStore } from './store';
 import Rig from './components/ui/Rig';
 import Files from './components/ui/Files';
@@ -9,10 +9,11 @@ import type { GeneratedData } from './types';
 
 interface SceneProps {
   data: GeneratedData;
+  enableZoom: boolean;
 }
 
-const Scene = ({ data }: SceneProps) => {
-  const { viewMode, selectFile, selectPerson, selectGroup } = useStore();
+const Scene = ({ data, enableZoom }: SceneProps) => {
+  const { selectFile, selectPerson, selectGroup } = useStore();
 
   const handleBackgroundClick = () => {
     selectFile(null);
@@ -21,31 +22,23 @@ const Scene = ({ data }: SceneProps) => {
   };
 
   return (
-    <Canvas 
-      camera={{ position: [0, 0, 10], fov: 45 }}
-      onPointerMissed={handleBackgroundClick} 
-    >
+    <Canvas onPointerMissed={handleBackgroundClick}>
+      {/* Orthographic Camera Setup */}
+      <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20} near={-200} far={2000} />
+      
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} />
       <Environment preset="city" />
 
-      {/* Logic */}
+      {/* Controls & Navigation */}
+      <OrbitControls makeDefault enableZoom={enableZoom} />
       <Rig />
-      {viewMode === 'fly' && <OrbitControls />}
 
       {/* Content */}
       <GroupLayers data={data} />
       <PeopleLayers data={data} />
       <Files data={data} />
-      
-      {/* Helper Grid - Only visible in grid/fly mode */}
-      {(viewMode === 'grid' || viewMode === 'fly') && (
-        <gridHelper 
-          args={[200, 100, 0x555555, 0x222222]} 
-          position={[50, -50, -20]} 
-          rotation={[0, 0, 0]}
-        />
-      )}
+    
     </Canvas>
   );
 };

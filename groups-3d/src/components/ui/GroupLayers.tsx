@@ -21,9 +21,8 @@ const GroupLayers = ({ data }: GroupLayersProps) => {
         // Position
         // Y: Based on group index
         const y = group.yIndex * dimensions.groupHeight;
-        // X: To the left of the timeline (start date is X=0)
+        // X: To the left of the timeline
         const x = -3; 
-        // Z: "On the plane in front of Abbey" (Abbey is at Z=0, so we place this at Z=0 or slightly in front)
         const z = 0.5;
 
         // Visual State
@@ -44,7 +43,7 @@ const GroupLayers = ({ data }: GroupLayersProps) => {
             onPointerOut={() => { document.body.style.cursor = 'auto'; }}
           >
              <Text
-                fontSize={0.6}
+                fontSize={1.2} // Increased size
                 color={color}
                 anchorX="right"
                 anchorY="middle"
@@ -56,7 +55,7 @@ const GroupLayers = ({ data }: GroupLayersProps) => {
               {/* Highlight Line if active */}
               {isActive && (
                 <mesh position={[1.5, -0.05, 0]}>
-                   <boxGeometry args={[3, 0.05, 0.05]} />
+                   <boxGeometry args={[3, 0.1, 0.05]} />
                    <meshBasicMaterial color="#3b82f6" />
                 </mesh>
               )}

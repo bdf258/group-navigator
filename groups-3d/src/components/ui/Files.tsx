@@ -6,11 +6,10 @@ import type { GeneratedData, FileNode, Group, Person } from '../../types';
 interface FilePillProps {
   file: FileNode;
   position: [number, number, number];
-  isFlyMode: boolean;
   opacity: number;
 }
 
-const FilePill = ({ file, position, isFlyMode, opacity }: FilePillProps) => {
+const FilePill = ({ file, position, opacity }: FilePillProps) => {
   const [hovered, setHovered] = useState(false);
   const { selectFile } = useStore();
 
@@ -30,8 +29,9 @@ const FilePill = ({ file, position, isFlyMode, opacity }: FilePillProps) => {
     selectFile(file);
   };
 
-  const radius = 0.25;
-  const length = 1.0; 
+  // Increased sizes
+  const radius = 0.4;
+  const length = 2.0; 
 
   return (
     <group position={position} onClick={handleClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
@@ -79,7 +79,7 @@ interface FilesProps {
 }
 
 const Files = ({ data }: FilesProps) => {
-  const { viewMode, dimensions, selectedFile, selectedPersonId, selectedGroupId } = useStore();
+  const { dimensions, selectedFile, selectedPersonId, selectedGroupId } = useStore();
   const { files, groups, people, startDate } = data;
 
   return (
@@ -98,21 +98,18 @@ const Files = ({ data }: FilesProps) => {
         let opacity = 1;
         
         if (selectedFile) {
-          opacity = selectedFile.id === file.id ? 1 : 0.3;
+          opacity = selectedFile.id === file.id ? 1 : 0.1;
         } else if (selectedPersonId) {
-          opacity = file.personId === selectedPersonId ? 1 : 0.3;
+          opacity = file.personId === selectedPersonId ? 1 : 0.1;
         } else if (selectedGroupId) {
-          opacity = file.groupId === selectedGroupId ? 1 : 0.3;
+          opacity = file.groupId === selectedGroupId ? 1 : 0.1;
         }
-
-        if (viewMode === 'fly') opacity = 0.5;
 
         return (
           <FilePill 
             key={file.id} 
             file={file} 
             position={[x, y, z]} 
-            isFlyMode={viewMode === 'fly'}
             opacity={opacity}
           />
         );
